@@ -10,12 +10,19 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/wariusagi/assessment-tax/pkg/config"
+	"github.com/wariusagi/assessment-tax/pkg/database"
 )
 
 func main() {
 	config := config.NewConfig()
 
 	e := echo.New()
+
+	if err := database.InitDB(config.DatabaseUrl); err != nil {
+		e.Logger.Fatalf("Initialize database failed: %v", err)
+	}
+	defer database.CloseDB()
+
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, Go Bootcamp!")
 	})
