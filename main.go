@@ -9,20 +9,23 @@ import (
 	"time"
 
 	"github.com/labstack/echo/v4"
+	"github.com/wariusagi/assessment-tax/pkg/config"
 )
 
 func main() {
+	config := config.NewConfig()
+
 	e := echo.New()
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, Go Bootcamp!")
 	})
 
-	startServer(e)
+	startServer(e, config.Port)
 }
 
-func startServer(e *echo.Echo) {
+func startServer(e *echo.Echo, port string) {
 	go func() {
-		if err := e.Start(":" + os.Getenv("PORT")); err != nil && err != http.ErrServerClosed {
+		if err := e.Start(":" + port); err != nil && err != http.ErrServerClosed {
 			e.Logger.Fatal("shutting down the server")
 		}
 	}()
@@ -36,6 +39,6 @@ func startServer(e *echo.Echo) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	if err := e.Shutdown(ctx); err != nil {
-		e.Logger.Errorf("Error shutting down the server: %v", err)
+		e.Logger.Fatalf("Error shutting down the server: %v", err)
 	}
 }
