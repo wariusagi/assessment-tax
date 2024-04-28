@@ -19,7 +19,7 @@ func (m *MockRepo) GetMasterTaxDeduction(year int) (database.MasterTaxDeduction,
 }
 
 func callService(req services.TaxCalculationRequest, mockRepo *MockRepo) (services.TaxCalculationResponse, error) {
-	service := services.NewTax(mockRepo)
+	service := services.NewTaxService(mockRepo)
 	return service.CalculateTax(req)
 
 }

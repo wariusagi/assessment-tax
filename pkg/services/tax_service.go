@@ -8,7 +8,7 @@ type taxService struct {
 	r database.Repository
 }
 
-func NewTax(r database.Repository) TaxService {
+func NewTaxService(r database.Repository) TaxService {
 	return taxService{r: r}
 }
 
