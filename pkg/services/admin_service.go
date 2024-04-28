@@ -13,6 +13,8 @@ type adminService struct {
 const (
 	personalDeductionMin = 10000
 	personalDeductionMax = 100000
+	kReceiptMin          = 10000
+	kReceiptMax          = 100000
 )
 
 func NewAdminService(r database.Repository) AdminService {
@@ -33,4 +35,20 @@ func (s adminService) SetDeduction(req AdminDeductionRequest) (AdminDeductionPer
 	}
 
 	return AdminDeductionPersonalResponse{PersonalDeduction: personalDeduction}, nil
+}
+
+func (s adminService) SetKReceipt(req AdminKReceiptRequest) (AdminKReceiptResponse, error) {
+	kReceipt := req.Amount
+	if req.Amount <= kReceiptMin {
+		return AdminKReceiptResponse{}, fmt.Errorf("amount must be more than : %v", personalDeductionMin)
+	} else if req.Amount > kReceiptMax {
+		kReceipt = kReceiptMax
+	}
+
+	err := s.r.UpdateAmtKReceiptDeduction(curYear, kReceipt)
+	if err != nil {
+		return AdminKReceiptResponse{}, err
+	}
+
+	return AdminKReceiptResponse{KReceipt: kReceipt}, nil
 }

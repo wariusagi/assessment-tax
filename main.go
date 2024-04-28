@@ -53,6 +53,7 @@ func setUpRoute(db *sql.DB) *echo.Echo {
 	g := e.Group("/admin")
 	g.Use(middleware.BasicAuth(AuthMiddleware))
 	g.POST("/deductions/personal", adminHandler.SetDeduction)
+	g.POST("/deductions/k-receipt", adminHandler.SetKReceipt)
 
 	return e
 }

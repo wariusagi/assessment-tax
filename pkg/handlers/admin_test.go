@@ -24,6 +24,10 @@ func (m *MockAdminService) SetDeduction(req services.AdminDeductionRequest) (ser
 	return m.res, m.err
 }
 
+func (m *MockAdminService) SetKReceipt(req services.AdminKReceiptRequest) (services.AdminKReceiptResponse, error) {
+	return services.AdminKReceiptResponse{}, m.err
+}
+
 func callAdminHandler(body io.Reader, mockService *MockAdminService) (*httptest.ResponseRecorder, error) {
 	// req
 	e := echo.New()

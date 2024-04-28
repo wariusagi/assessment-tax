@@ -13,6 +13,10 @@ func (m *MockRepo) UpdateAmtPersonalDeductionDeduction(cycleYear int, amtPersona
 	return m.err
 }
 
+func (m *MockRepo) UpdateAmtKReceiptDeduction(cycleYear int, amtKReceipt float64) error {
+	return m.err
+}
+
 func callAdminService(req services.AdminDeductionRequest, mockRepo *MockRepo) (services.AdminDeductionPersonalResponse, error) {
 	service := services.NewAdminService(mockRepo)
 	return service.SetDeduction(req)
