@@ -44,11 +44,12 @@ func setUpRoute(db *sql.DB) *echo.Echo {
 	repo := database.NewRepositoryDB(db)
 	taxService := services.NewTaxService(repo)
 	taxHandler := handlers.NewTaxHandler(taxService)
-	e.POST("/tax/calculations", taxHandler.CalculateTax)
+	gt := e.Group("/tax")
+	gt.POST("/calculations", taxHandler.CalculateTax)
+	gt.POST("/calculations/upload-csv", taxHandler.CalculateTaxFromCsv)
 
 	adminService := services.NewAdminService(repo)
 	adminHandler := handlers.NewAdminHandler(adminService)
-
 	g := e.Group("/admin")
 	g.Use(middleware.BasicAuth(AuthMiddleware))
 	g.POST("/deductions/personal", adminHandler.SetDeduction)
