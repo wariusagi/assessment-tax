@@ -46,6 +46,8 @@ func (r repositoryDB) UpdateAmtPersonalDeductionDeduction(cycleYear int, amtPers
 		return fmt.Errorf("update amt_personal_deduction_min to table master_tax_deduction failed: %v", err)
 	}
 
+	delete(CacheMasterTaxDeduction, cycleYear)
+
 	log.Printf("amt_personal_deduction_min updated [%v][%v]", cycleYear, amtPersonalDeduction)
 	return nil
 }

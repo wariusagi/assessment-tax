@@ -32,6 +32,8 @@ func (s taxService) CalculateTax(req TaxCalculationRequest) (TaxCalculationRespo
 		switch strings.ToLower(a.AllowanceType) {
 		case "donation":
 			netTotalIncome -= math.Min(a.Amount, data.AmtDonationMax)
+		case "k-receipt":
+			netTotalIncome -= math.Min(a.Amount, data.AmtKReceiptMax)
 		default:
 			return TaxCalculationResponse{}, fmt.Errorf("not allow type = %v", a.AllowanceType)
 		}
