@@ -28,7 +28,7 @@ var TaxLevels = []TaxLevel{
 	{150000, 500000, 0.10},
 	{500000, 1000000, 0.15},
 	{1000000, 2000000, 0.20},
-	{2000000, math.MaxFloat64, 0.35}, // -1 is unlimit
+	{2000000, math.MaxFloat64, 0.35},
 }
 
 type TaxService interface {
