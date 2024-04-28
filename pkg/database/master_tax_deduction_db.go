@@ -20,7 +20,7 @@ func (r repositoryDB) GetMasterTaxDeduction(cycleYear int) (MasterTaxDeduction, 
 		`,
 	)
 	if err != nil {
-		return MasterTaxDeduction{}, fmt.Errorf(`can't prepare statment: %v`, err)
+		return MasterTaxDeduction{}, fmt.Errorf(`prepare statement failed: %v`, err)
 	}
 
 	row := stmt.QueryRow(cycleYear)
@@ -28,7 +28,7 @@ func (r repositoryDB) GetMasterTaxDeduction(cycleYear int) (MasterTaxDeduction, 
 
 	err = row.Scan(&result.CycleYear, &result.AmtKReceiptMax, &result.AmtDonationMax, &result.AmtPersonalDeductionMin)
 	if err != nil {
-		return MasterTaxDeduction{}, fmt.Errorf(`can't scan row into variables: %v`, err)
+		return MasterTaxDeduction{}, fmt.Errorf(`scan row into variables failed: %v`, err)
 	}
 	CacheMasterTaxDeduction[cycleYear] = result
 	return result, nil

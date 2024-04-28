@@ -63,6 +63,33 @@ func TestServiceCalculateTax_SuccessWithDiscountWht(t *testing.T) {
 	assert.Equal(t, resTaxExpected, res.Tax)
 }
 
+func TestServiceCalculateTax_SuccessWithDiscountDonation(t *testing.T) {
+	// mock
+	mockRepo := &MockRepo{
+		data: database.MasterTaxDeduction{
+			AmtPersonalDeductionMin: 60000,
+			AmtDonationMax:          100000,
+		},
+		err: nil,
+	}
+	req := services.TaxCalculationRequest{
+		TotalIncome: 500000.0,
+		Wht:         0.0,
+		Allowances: []services.Allowance{
+			{
+				AllowanceType: "donation",
+				Amount:        200000.0,
+			},
+		},
+	}
+
+	res, err := callService(req, mockRepo)
+
+	assert.NoError(t, err)
+	resTaxExpected := 19000.0
+	assert.Equal(t, resTaxExpected, res.Tax)
+}
+
 func TestServiceCalculateTax_ErrorGetDB(t *testing.T) {
 	// mock
 	mockRepo := &MockRepo{
@@ -71,6 +98,31 @@ func TestServiceCalculateTax_ErrorGetDB(t *testing.T) {
 	}
 	req := services.TaxCalculationRequest{
 		TotalIncome: 500000.0,
+	}
+
+	_, err := callService(req, mockRepo)
+
+	assert.Error(t, err)
+}
+
+func TestServiceCalculateTax_ErrorAllowanceTypeNotAllow(t *testing.T) {
+	// mock
+	mockRepo := &MockRepo{
+		data: database.MasterTaxDeduction{
+			AmtPersonalDeductionMin: 60000,
+			AmtDonationMax:          100000,
+		},
+		err: nil,
+	}
+	req := services.TaxCalculationRequest{
+		TotalIncome: 500000.0,
+		Wht:         0.0,
+		Allowances: []services.Allowance{
+			{
+				AllowanceType: "test",
+				Amount:        200000.0,
+			},
+		},
 	}
 
 	_, err := callService(req, mockRepo)
