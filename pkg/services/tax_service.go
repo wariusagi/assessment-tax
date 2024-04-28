@@ -37,19 +37,38 @@ func (s taxService) CalculateTax(req TaxCalculationRequest) (TaxCalculationRespo
 		}
 	}
 
-	var tax float64
-	for _, lv := range TaxLevels {
+	if netTotalIncome < 0 {
+		netTotalIncome = 0
+	}
+
+	// calculate tax
+	var taxTotal float64
+	taxLevel := []TaxLevelRes{}
+	idxFinalTax := 0
+	for i, lv := range TaxCalculatorLevels {
+		taxLevel = append(taxLevel, TaxLevelRes{Level: lv.Text})
 		if netTotalIncome >= lv.Upper {
-			tax += (lv.Upper - lv.Lower) * lv.Rate
+			tax := (lv.Upper - lv.Lower) * lv.Rate
+			if tax > 0 {
+				taxLevel[i].Tax = tax
+				taxTotal += tax
+			}
 		} else {
-			tax += (netTotalIncome - lv.Lower) * lv.Rate
+			tax := (netTotalIncome - lv.Lower) * lv.Rate
+			taxLevel[i].Tax = tax
+			taxTotal += tax
+			idxFinalTax = i
 			break
 		}
 	}
 
+	for i := idxFinalTax + 1; i < len(TaxCalculatorLevels); i++ {
+		taxLevel = append(taxLevel, TaxLevelRes{Level: TaxCalculatorLevels[i].Text})
+	}
+
 	// discount: wht
 	if req.Wht > 0 {
-		tax -= req.Wht
+		taxTotal -= req.Wht
 	}
-	return TaxCalculationResponse{Tax: tax}, nil
+	return TaxCalculationResponse{Tax: taxTotal, TaxLevel: taxLevel}, nil
 }
