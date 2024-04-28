@@ -18,6 +18,21 @@ type TaxCalculationResponse struct {
 	TaxLevel []TaxLevelRes `json:"taxLevel"`
 }
 
+type TaxCalculationUploadFileHeaderRequest struct {
+	TotalIncome float64 `json:"totalIncome"`
+	Wht         float64 `json:"wht"`
+	Donation    float64 `json:"donation"`
+}
+
+type TaxCalculationUploadResponse struct {
+	Taxes []TaxInfo `json:"taxes"`
+}
+
+type TaxInfo struct {
+	TotalIncome float64 `json:"totalIncome"`
+	Tax         float64 `json:"tax"`
+}
+
 type TaxLevelRes struct {
 	Level string  `json:"level"`
 	Tax   float64 `json:"tax"`
