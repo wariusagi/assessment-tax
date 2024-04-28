@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -18,18 +20,18 @@ import (
 
 func main() {
 	config := config.NewConfig()
-
-	e := setUpRoute()
-
-	if err := database.InitDB(config.DatabaseUrl); err != nil {
-		e.Logger.Fatalf("Initialize database failed: %v", err)
+	db, err := database.InitDB(config.DatabaseUrl)
+	if err != nil {
+		log.Fatalf("Initialize database failed: %v", err)
 	}
-	defer database.CloseDB()
+	defer database.CloseDB(db)
+
+	e := setUpRoute(db)
 
 	startServer(e, config.Port)
 }
 
-func setUpRoute() *echo.Echo {
+func setUpRoute(db *sql.DB) *echo.Echo {
 	e := echo.New()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
@@ -39,7 +41,8 @@ func setUpRoute() *echo.Echo {
 		return c.String(http.StatusOK, "Hello, Go Bootcamp!")
 	})
 
-	taxService := services.NewTax("todo repo!!")
+	repo := database.NewRepositoryDB(db)
+	taxService := services.NewTax(repo)
 	taxHandler := handlers.NewTaxHandler(taxService)
 	e.POST("/tax/calculations", taxHandler.CalculateTax)
 	return e

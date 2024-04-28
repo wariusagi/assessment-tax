@@ -26,7 +26,7 @@ func (h taxHandler) CalculateTax(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, Err{Message: err.Error()})
 	}
 
-	res, err := h.srv.NewTaxCalculation(req)
+	res, err := h.srv.CalculateTax(req)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
 	}
