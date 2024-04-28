@@ -5,6 +5,8 @@ import (
 	"os"
 )
 
+var AppConfig Config
+
 type Config struct {
 	Port          string
 	DatabaseUrl   string
@@ -12,7 +14,11 @@ type Config struct {
 	AdminPassword string
 }
 
-func NewConfig() *Config {
+func InitConfig() {
+	AppConfig = *getConfig()
+}
+
+func getConfig() *Config {
 	return &Config{
 		Port:          getenv("PORT"),
 		DatabaseUrl:   getenv("DATABASE_URL"),

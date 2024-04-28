@@ -24,7 +24,7 @@ func (m *MockTaxService) CalculateTax(req services.TaxCalculationRequest) (servi
 	return m.res, m.err
 }
 
-func callHandler(body io.Reader, mockService *MockTaxService) (*httptest.ResponseRecorder, error) {
+func callTaxHandler(body io.Reader, mockService *MockTaxService) (*httptest.ResponseRecorder, error) {
 	// req
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodPost, "/tax/calculations", body)
@@ -38,7 +38,7 @@ func callHandler(body io.Reader, mockService *MockTaxService) (*httptest.Respons
 	return rec, err
 }
 
-func TestHandlerCalculateTax_Success(t *testing.T) {
+func TestTaxHandlerCalculateTax_Success(t *testing.T) {
 	reqBody := services.TaxCalculationRequest{}
 	reqBodyJson, err := json.Marshal(reqBody)
 	if err != nil {
@@ -51,7 +51,7 @@ func TestHandlerCalculateTax_Success(t *testing.T) {
 		err: nil,
 	}
 
-	rec, err := callHandler(bytes.NewReader(reqBodyJson), mockService)
+	rec, err := callTaxHandler(bytes.NewReader(reqBodyJson), mockService)
 
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusOK, rec.Code)
@@ -64,7 +64,7 @@ func TestHandlerCalculateTax_Success(t *testing.T) {
 	assert.Equal(t, resBodyExpected, resBody)
 }
 
-func TestHandlerCalculateTax_ErrorBindReq(t *testing.T) {
+func TestTaxHandlerCalculateTax_ErrorBindReq(t *testing.T) {
 	// req
 	reqBodyStr := `{"wht":"mock"}`
 
@@ -74,13 +74,13 @@ func TestHandlerCalculateTax_ErrorBindReq(t *testing.T) {
 		err: nil,
 	}
 
-	rec, err := callHandler(bytes.NewBufferString(reqBodyStr), mockService)
+	rec, err := callTaxHandler(bytes.NewBufferString(reqBodyStr), mockService)
 
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusBadRequest, rec.Code)
 }
 
-func TestHandlerCalculateTax_ErrorNewTaxCalculation(t *testing.T) {
+func TestTaxHandlerCalculateTax_ErrorCalculateTaxService(t *testing.T) {
 	// req
 	reqBody := services.TaxCalculationRequest{}
 	reqBodyJson, err := json.Marshal(reqBody)
@@ -94,7 +94,7 @@ func TestHandlerCalculateTax_ErrorNewTaxCalculation(t *testing.T) {
 		err: fmt.Errorf("mock error"),
 	}
 
-	rec, err := callHandler(bytes.NewReader(reqBodyJson), mockService)
+	rec, err := callTaxHandler(bytes.NewReader(reqBodyJson), mockService)
 
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusInternalServerError, rec.Code)

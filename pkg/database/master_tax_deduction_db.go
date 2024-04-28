@@ -2,6 +2,7 @@ package database
 
 import (
 	"fmt"
+	"log"
 )
 
 var CacheMasterTaxDeduction = make(map[int]MasterTaxDeduction)
@@ -32,4 +33,19 @@ func (r repositoryDB) GetMasterTaxDeduction(cycleYear int) (MasterTaxDeduction, 
 	}
 	CacheMasterTaxDeduction[cycleYear] = result
 	return result, nil
+}
+
+func (r repositoryDB) UpdateAmtPersonalDeductionDeduction(cycleYear int, amtPersonalDeduction float64) error {
+	_, err := r.db.Exec(`
+		UPDATE master_tax_deduction
+		SET amt_personal_deduction_min = $1, updated_at = NOW(), updated_by = $2
+		WHERE cycle_year = $3
+	`, amtPersonalDeduction, "ADMIN_JA", cycleYear)
+
+	if err != nil {
+		return fmt.Errorf("update amt_personal_deduction_min to table master_tax_deduction failed: %v", err)
+	}
+
+	log.Printf("amt_personal_deduction_min updated [%v][%v]", cycleYear, amtPersonalDeduction)
+	return nil
 }
