@@ -19,16 +19,22 @@ func (s taxService) CalculateTax(req TaxCalculationRequest) (TaxCalculationRespo
 		return TaxCalculationResponse{}, err
 	}
 
-	taxTotalIncome := req.TotalIncome - data.AmtPersonalDeductionMin
+	// discount: personal deduction
+	netTotalIncome := req.TotalIncome - data.AmtPersonalDeductionMin
 
 	var tax float64
 	for _, lv := range TaxLevels {
-		if taxTotalIncome >= lv.Upper {
+		if netTotalIncome >= lv.Upper {
 			tax += (lv.Upper - lv.Lower) * lv.Rate
 		} else {
-			tax += (taxTotalIncome - lv.Lower) * lv.Rate
+			tax += (netTotalIncome - lv.Lower) * lv.Rate
 			break
 		}
+	}
+
+	// discount: wht
+	if req.Wht > 0 {
+		tax -= req.Wht
 	}
 
 	return TaxCalculationResponse{Tax: tax}, nil
