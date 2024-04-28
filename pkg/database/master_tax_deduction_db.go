@@ -40,7 +40,7 @@ func (r repositoryDB) UpdateAmtPersonalDeductionDeduction(cycleYear int, amtPers
 		UPDATE master_tax_deduction
 		SET amt_personal_deduction_min = $1, updated_at = NOW(), updated_by = $2
 		WHERE cycle_year = $3
-	`, amtPersonalDeduction, "ADMIN_JA", cycleYear)
+	`, amtPersonalDeduction, "ADMIN", cycleYear)
 
 	if err != nil {
 		return fmt.Errorf("update amt_personal_deduction_min to table master_tax_deduction failed: %v", err)
@@ -49,5 +49,22 @@ func (r repositoryDB) UpdateAmtPersonalDeductionDeduction(cycleYear int, amtPers
 	delete(CacheMasterTaxDeduction, cycleYear)
 
 	log.Printf("amt_personal_deduction_min updated [%v][%v]", cycleYear, amtPersonalDeduction)
+	return nil
+}
+
+func (r repositoryDB) UpdateAmtKReceiptDeduction(cycleYear int, amtKReceipt float64) error {
+	_, err := r.db.Exec(`
+		UPDATE master_tax_deduction
+		SET amt_k_receipt_max = $1, updated_at = NOW(), updated_by = $2
+		WHERE cycle_year = $3
+	`, amtKReceipt, "ADMIN", cycleYear)
+
+	if err != nil {
+		return fmt.Errorf("update amt_k_receipt_max to table master_tax_deduction failed: %v", err)
+	}
+
+	delete(CacheMasterTaxDeduction, cycleYear)
+
+	log.Printf("amt_k_receipt_max updated [%v][%v]", cycleYear, amtKReceipt)
 	return nil
 }
