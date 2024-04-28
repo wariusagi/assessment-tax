@@ -9,25 +9,40 @@ import (
 	"time"
 
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/wariusagi/assessment-tax/pkg/config"
 	"github.com/wariusagi/assessment-tax/pkg/database"
+	"github.com/wariusagi/assessment-tax/pkg/handlers"
+	"github.com/wariusagi/assessment-tax/pkg/services"
 )
 
 func main() {
 	config := config.NewConfig()
 
-	e := echo.New()
+	e := setUpRoute()
 
 	if err := database.InitDB(config.DatabaseUrl); err != nil {
 		e.Logger.Fatalf("Initialize database failed: %v", err)
 	}
 	defer database.CloseDB()
 
+	startServer(e, config.Port)
+}
+
+func setUpRoute() *echo.Echo {
+	e := echo.New()
+	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
+
+	// routes
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, Go Bootcamp!")
 	})
 
-	startServer(e, config.Port)
+	taxService := services.NewTax("todo repo!!")
+	taxHandler := handlers.NewTaxHandler(taxService)
+	e.POST("/tax/calculations", taxHandler.CalculateTax)
+	return e
 }
 
 func startServer(e *echo.Echo, port string) {
