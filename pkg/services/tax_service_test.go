@@ -19,7 +19,7 @@ func (m *MockRepo) GetMasterTaxDeduction(year int) (database.MasterTaxDeduction,
 }
 
 func callService(req services.TaxCalculationRequest, mockRepo *MockRepo) (services.TaxCalculationResponse, error) {
-	service := services.NewTax(mockRepo)
+	service := services.NewTaxService(mockRepo)
 	return service.CalculateTax(req)
 
 }
@@ -33,13 +33,33 @@ func TestServiceCalculateTax_Success(t *testing.T) {
 		err: nil,
 	}
 	req := services.TaxCalculationRequest{
-		TotalIncome: 500000,
+		TotalIncome: 500000.0,
 	}
 
 	res, err := callService(req, mockRepo)
 
 	assert.NoError(t, err)
 	resTaxExpected := 29000.0
+	assert.Equal(t, resTaxExpected, res.Tax)
+}
+
+func TestServiceCalculateTax_SuccessWithDiscountWht(t *testing.T) {
+	// mock
+	mockRepo := &MockRepo{
+		data: database.MasterTaxDeduction{
+			AmtPersonalDeductionMin: 60000,
+		},
+		err: nil,
+	}
+	req := services.TaxCalculationRequest{
+		TotalIncome: 500000.0,
+		Wht:         25000.0,
+	}
+
+	res, err := callService(req, mockRepo)
+
+	assert.NoError(t, err)
+	resTaxExpected := 4000.0
 	assert.Equal(t, resTaxExpected, res.Tax)
 }
 
@@ -50,7 +70,7 @@ func TestServiceCalculateTax_ErrorGetDB(t *testing.T) {
 		err:  fmt.Errorf("mock error"),
 	}
 	req := services.TaxCalculationRequest{
-		TotalIncome: 500000,
+		TotalIncome: 500000.0,
 	}
 
 	_, err := callService(req, mockRepo)

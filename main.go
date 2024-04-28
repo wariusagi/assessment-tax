@@ -42,7 +42,7 @@ func setUpRoute(db *sql.DB) *echo.Echo {
 	})
 
 	repo := database.NewRepositoryDB(db)
-	taxService := services.NewTax(repo)
+	taxService := services.NewTaxService(repo)
 	taxHandler := handlers.NewTaxHandler(taxService)
 	e.POST("/tax/calculations", taxHandler.CalculateTax)
 	return e
