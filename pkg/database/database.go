@@ -8,48 +8,46 @@ import (
 	_ "github.com/lib/pq"
 )
 
-var db *sql.DB
-
-func InitDB(dbUrl string) error {
+func InitDB(dbUrl string) (*sql.DB, error) {
 	// open connection
 	log.Println("Database connecting...")
 	var err error
-	db, err = sql.Open("postgres", dbUrl)
+	db, err := sql.Open("postgres", dbUrl)
 	if err != nil {
-		return fmt.Errorf("open connection: %v", err)
+		return nil, fmt.Errorf("open connection: %v", err)
 	}
 
 	// check connection
 	log.Println("Database pinging...")
 	err = db.Ping()
 	if err != nil {
-		return fmt.Errorf("ping: %v", err)
+		return db, fmt.Errorf("ping: %v", err)
 	}
 
 	log.Println("Database connected!")
 
-	err = initMasterData()
+	err = initMasterData(db)
 	if err != nil {
-		return fmt.Errorf("init master data: %v", err)
+		return db, fmt.Errorf("init master data: %v", err)
 	}
 
 	log.Println("Initialized master data!")
-	return nil
+	return db, nil
 }
 
-func CloseDB() {
+func CloseDB(db *sql.DB) {
 	if db != nil {
 		db.Close()
 		log.Println("Database closed!")
 	}
 }
 
-func initMasterData() error {
-	err := CreateMasterTaxDeduction()
+func initMasterData(db *sql.DB) error {
+	err := CreateMasterTaxDeduction(db)
 	if err != nil {
 		return err
 	}
-	err = InsertMasterTaxDeduction()
+	err = InsertMasterTaxDeduction(db)
 	if err != nil {
 		return err
 	}
