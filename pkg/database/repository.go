@@ -12,4 +12,5 @@ func NewRepositoryDB(db *sql.DB) Repository {
 
 type Repository interface {
 	GetMasterTaxDeduction(cycleYear int) (MasterTaxDeduction, error)
+	UpdateAmtPersonalDeductionDeduction(cycleYear int, amtPersonalDeduction float64) error
 }

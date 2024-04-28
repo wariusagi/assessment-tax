@@ -19,8 +19,8 @@ import (
 )
 
 func main() {
-	config := config.NewConfig()
-	db, err := database.InitDB(config.DatabaseUrl)
+	config.InitConfig()
+	db, err := database.InitDB(config.AppConfig.DatabaseUrl)
 	if err != nil {
 		log.Fatalf("Initialize database failed: %v", err)
 	}
@@ -28,7 +28,7 @@ func main() {
 
 	e := setUpRoute(db)
 
-	startServer(e, config.Port)
+	startServer(e, config.AppConfig.Port)
 }
 
 func setUpRoute(db *sql.DB) *echo.Echo {
@@ -45,7 +45,22 @@ func setUpRoute(db *sql.DB) *echo.Echo {
 	taxService := services.NewTaxService(repo)
 	taxHandler := handlers.NewTaxHandler(taxService)
 	e.POST("/tax/calculations", taxHandler.CalculateTax)
+
+	adminService := services.NewAdminService(repo)
+	adminHandler := handlers.NewAdminHandler(adminService)
+
+	g := e.Group("/admin")
+	g.Use(middleware.BasicAuth(AuthMiddleware))
+	g.POST("/deductions/personal", adminHandler.SetDeduction)
+
 	return e
+}
+
+func AuthMiddleware(username, password string, c echo.Context) (bool, error) {
+	if username == config.AppConfig.AdminUsername && password == config.AppConfig.AdminPassword {
+		return true, nil
+	}
+	return false, nil
 }
 
 func startServer(e *echo.Echo, port string) {
