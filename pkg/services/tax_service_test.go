@@ -90,6 +90,38 @@ func TestTaxServiceCalculateTax_SuccessWithDiscountDonation(t *testing.T) {
 	assert.Equal(t, resTaxExpected, res.Tax)
 }
 
+func TestTaxServiceCalculateTax_SuccessWithDiscountKReceipt(t *testing.T) {
+	// mock
+	mockRepo := &MockRepo{
+		data: database.MasterTaxDeduction{
+			AmtPersonalDeductionMin: 60000,
+			AmtDonationMax:          100000,
+			AmtKReceiptMax:          50000,
+		},
+		err: nil,
+	}
+	req := services.TaxCalculationRequest{
+		TotalIncome: 500000.0,
+		Wht:         0.0,
+		Allowances: []services.Allowance{
+			{
+				AllowanceType: "k-receipt",
+				Amount:        200000.0,
+			},
+			{
+				AllowanceType: "donation",
+				Amount:        100000.0,
+			},
+		},
+	}
+
+	res, err := callTaxService(req, mockRepo)
+
+	assert.NoError(t, err)
+	resTaxExpected := 14000.0
+	assert.Equal(t, resTaxExpected, res.Tax)
+}
+
 func TestTaxServiceCalculateTax_SuccessWithResponseTaxLevel(t *testing.T) {
 	// mock
 	mockRepo := &MockRepo{
